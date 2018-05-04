@@ -1,0 +1,26 @@
+<html>
+<head>
+	<title>Drag and drop music</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="dropzone.css">
+	<script type="text/javascript" src="dropzone.js"></script>
+	<script type="text/javascript">
+		Dropzone.options.myAwesomeDropzone = {
+			paramName: "file",
+			parallelUploads: 1,
+			init: function(){
+			    this.on("sending", function(file, xhr, formData){
+                    var fn = encodeURI(file.name);
+                    formData.append("encodedFileName", fn);
+			    });
+			},
+			maxFilesize: 1024,
+			timeout: 60*5*1000 //ms
+		}
+	</script>
+</head>
+<body>
+	<form action="/upload" class="dropzone" id="my-awesome-dropzone">
+	</form>
+</body>
+</html>

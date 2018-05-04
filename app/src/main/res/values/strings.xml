@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Music Manager</string>
+    <string name="pref_summary_music_folder">Select storage for upload music (sdcard, internal memory, etc.)</string>
+    <string name="pref_title_music_folder">Music storage</string>
+
+    <string name="upload_server_short_info">Wifi address for browser: %1$s:%2$s\n
+        Server will shutdown in 5 minutes after start or file uploaded.</string>
+    <string name="upload_server_started">Upload server started</string>
+
+    <string name="music_folder_not_set">Storage for music is not set or ejected</string>
+
+    <string name="choose_action">Choose action</string>
+
+    <string name="track_action_rename">Rename</string>
+    <string name="track_rename_dialog_title">New name</string>
+    <string name="track_action_delete">Delete</string>
+    <string name="file_delete_confirm">Delete file?</string>
+
+    <string name="tag_create_dialog_title">New tag</string>
+    <string name="tag_action_rename">Rename</string>
+    <string name="tag_rename_dialog_title">New name</string>
+    <string name="tag_action_delete">Delete</string>
+    <string name="tag_delete_confirm">Delete tag?</string>
+
+    <string name="hint_filter_by_name">Filter by name</string>
+    <string name="apply">Apply</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_filter_by_tag"
+        android:title="Filter By tag"></item>
+    <item android:id="@+id/action_enable_upload_server"
+        android:title="Upload"></item>
+    <item android:id="@+id/action_settings"
+        android:title="Settings"></item>
+    <item android:id="@+id/action_reload_files"
+        android:title="Reload files"></item>
+</menu>
