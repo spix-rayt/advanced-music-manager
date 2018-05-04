@@ -1,7 +1,6 @@
 package io.spixy.advancedmusicmanager.upload
 
 import android.content.Context
-import android.util.Log
 import fi.iki.elonen.NanoHTTPD
 import io.reactivex.subjects.PublishSubject
 import io.spixy.advancedmusicmanager.R
@@ -55,8 +54,8 @@ class UploadServer(val context: Context) : NanoHTTPD(9144) {
         }
 
         when(session.uri){
-            "/dropzone.js" -> return newFixedLengthResponse(context.assets.open("dropzone.js").bufferedReader().use { it.readText() })
-            "/dropzone.css" -> return newFixedLengthResponse(context.assets.open("dropzone.css").bufferedReader().use { it.readText() })
+            "/dropzone.js" -> return newFixedLengthResponse(context.assets.open("dependencies/dropzone.js").bufferedReader().use { it.readText() })
+            "/dropzone.css" -> return newFixedLengthResponse(context.assets.open("dependencies/dropzone.css").bufferedReader().use { it.readText() })
             "/upload" -> {
                 val musicFolder = getUploadFolder()
                 if(musicFolder!=""){
