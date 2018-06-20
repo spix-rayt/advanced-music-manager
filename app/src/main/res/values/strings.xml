@@ -22,6 +22,19 @@
     <string name="tag_action_delete">Delete</string>
     <string name="tag_delete_confirm">Delete tag?</string>
 
+    <string name="sort_dialog_title">Sort by</string>
+
+    <!-- MainActivity.Sort-->
+    <string-array name="sort_dialog_items">
+        <item>Name</item>
+        <item>Date</item>
+        <item>Random</item>
+    </string-array>
+
     <string name="hint_filter_by_name">Filter by name</string>
     <string name="apply">Apply</string>
+
+
+
+    <string name="pref_sort_key">pref_sort_key</string>
 </resources>

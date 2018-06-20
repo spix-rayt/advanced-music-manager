@@ -4,8 +4,10 @@
         android:title="Filter By tag"></item>
     <item android:id="@+id/action_enable_upload_server"
         android:title="Upload"></item>
-    <item android:id="@+id/action_settings"
-        android:title="Settings"></item>
+    <item android:id="@+id/action_sort"
+        android:title="Sort"></item>
     <item android:id="@+id/action_reload_files"
         android:title="Reload files"></item>
+    <item android:id="@+id/action_settings"
+        android:title="Settings"></item>
 </menu>

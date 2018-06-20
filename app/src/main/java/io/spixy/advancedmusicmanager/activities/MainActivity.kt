@@ -4,12 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -19,7 +17,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.subjects.BehaviorSubject
-import io.spixy.advancedmusicmanager.*
+import io.spixy.advancedmusicmanager.MusicService
+import io.spixy.advancedmusicmanager.R
+import io.spixy.advancedmusicmanager.TrackFile
 import io.spixy.advancedmusicmanager.adapters.MusicListAdapter
 import io.spixy.advancedmusicmanager.adapters.TagWrapper
 import io.spixy.advancedmusicmanager.dagger.BaseApplication
@@ -29,8 +29,10 @@ import io.spixy.advancedmusicmanager.dialogs.ConfirmDialog
 import io.spixy.advancedmusicmanager.dialogs.TextDialog
 import io.spixy.advancedmusicmanager.upload.UploadServer
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.defaultSharedPreferences
 import java.math.BigInteger
 import java.net.InetAddress
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -41,6 +43,14 @@ class MainActivity : AppCompatActivity() {
     val musicListAdapter = MusicListAdapter(arrayListOf())
     val currentTrackList = BehaviorSubject.create<List<TrackFile>>().toSerialized()
     var filter = hashMapOf<Long, TagWrapper.Status>()
+    val sort:BehaviorSubject<Sort> by lazy {
+        val defaultSort = Sort.Name
+        val savedSort = this.defaultSharedPreferences.getInt(getString(R.string.pref_sort_key), defaultSort.n)
+        BehaviorSubject.createDefault(Sort.values().getOrElse(savedSort) { defaultSort })
+    }
+    enum class Sort(val n: Int){
+        Name(0), Date(1), Random(2)
+    }
     var currentPlayListShowed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,15 +89,33 @@ class MainActivity : AppCompatActivity() {
             })
         }
 
-        Observable.combineLatest<CharSequence, List<TrackFile>, List<TrackFile>>(
-                RxTextView.textChanges(text_filter),
+        val sortedTracks = Observable.combineLatest<List<TrackFile>, Sort, List<TrackFile>>(
                 currentTrackList,
-                BiFunction { textFilter, tracks ->
+                sort,
+                BiFunction { tracks, sort ->
+                    when(sort){
+                        Sort.Name -> {
+                            tracks.sortedBy { it.lowerCaseName }
+                        }
+                        Sort.Date -> {
+                            tracks.sortedByDescending { it.date }
+                        }
+                        Sort.Random -> {
+                            tracks.shuffled()
+                        }
+                    }
+                }
+        )
+
+        Observable.combineLatest<List<TrackFile>, CharSequence, List<TrackFile>>(
+                sortedTracks,
+                RxTextView.textChanges(text_filter),
+                BiFunction { tracks, textFilter ->
                     tracks.filter { it.lowerCaseName.contains(textFilter.toString().toLowerCase()) }
                 }
-        ).observeOn(AndroidSchedulers.mainThread()).subscribe {
+        ).observeOn(AndroidSchedulers.mainThread()).subscribe { tracks->
             musicListAdapter.files.clear()
-            musicListAdapter.files.addAll(it)
+            musicListAdapter.files.addAll(tracks)
             musicListAdapter.notifyDataSetChanged()
         }
 
@@ -130,6 +158,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     })
                 }
+            }
+        }
+
+        sort.subscribe { sortValue->
+            with(this.defaultSharedPreferences.edit()){
+                putInt(getString(R.string.pref_sort_key), sortValue.n)
+                commit()
             }
         }
     }
@@ -189,6 +224,16 @@ class MainActivity : AppCompatActivity() {
                     dialogInterface.cancel()
                 }
                 builder.show()
+                true
+            }
+            R.id.action_sort -> {
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle(getString(R.string.sort_dialog_title))
+                builder.setSingleChoiceItems(resources.getStringArray(R.array.sort_dialog_items), sort.value.n){ dialog, n ->
+                    sort.onNext(Sort.values()[n])
+                    dialog.dismiss()
+                }
+                builder.create().show()
                 true
             }
             R.id.action_reload_files -> {
