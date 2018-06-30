@@ -4,8 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import io.spixy.advancedmusicmanager.*
-import io.spixy.advancedmusicmanager.db.Tag
+import io.spixy.advancedmusicmanager.R
 import kotlinx.android.synthetic.main.filter_by_tag_list_item_view.view.*
 
 class FilterByTagListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Adapter<FilterByTagListAdapter.ViewHolder>() {

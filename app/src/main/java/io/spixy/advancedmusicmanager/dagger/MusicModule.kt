@@ -9,7 +9,6 @@ import android.os.IBinder
 import android.preference.PreferenceManager
 import dagger.Module
 import dagger.Provides
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import io.spixy.advancedmusicmanager.MusicService
@@ -19,7 +18,6 @@ import javax.inject.Singleton
 
 @Module
 class MusicModule(private val application: BaseApplication) {
-
     @Provides
     @Singleton
     fun provideMusicService(): Single<MusicService> {

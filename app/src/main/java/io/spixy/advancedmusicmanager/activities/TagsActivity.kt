@@ -1,15 +1,16 @@
 package io.spixy.advancedmusicmanager.activities
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import io.spixy.advancedmusicmanager.R
-import io.spixy.advancedmusicmanager.dialogs.TextDialog
 import io.spixy.advancedmusicmanager.adapters.TagWrapper
 import io.spixy.advancedmusicmanager.adapters.TagsListAdapter
 import io.spixy.advancedmusicmanager.db.Tag
 import io.spixy.advancedmusicmanager.db.TagTrackRelation
 import io.spixy.advancedmusicmanager.db.Track
+import io.spixy.advancedmusicmanager.dialogs.TextDialog
 import kotlinx.android.synthetic.main.activity_tags.*
 
 class TagsActivity : AppCompatActivity() {
@@ -31,6 +32,7 @@ class TagsActivity : AppCompatActivity() {
                     it.status = TagWrapper.Status.NONE
                 }
             }
+            tagsListAdapter.notifyDataSetChanged()
         }
 
         button_new.setOnClickListener {
@@ -46,7 +48,7 @@ class TagsActivity : AppCompatActivity() {
         button_apply.setOnClickListener {
             val track = Track.fetchWithPath(intent.getStringExtra(INTENT_DATA_NAME_PATH))
             TagTrackRelation.deleteByTrackId(track.id)
-            tagsListAdapter.tags.filter { it.status== TagWrapper.Status.CHECKED }.forEach {
+            tagsListAdapter.tags.filter { it.status== TagWrapper.Status.CHECKED }.also { Log.d("DBG", it.joinToString { it.tag.name }) }.forEach {
                 TagTrackRelation().apply {
                     tag = it.tag
                     this.track = track

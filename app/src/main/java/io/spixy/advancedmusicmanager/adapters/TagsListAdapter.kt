@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import io.spixy.advancedmusicmanager.*
+import io.spixy.advancedmusicmanager.R
 import io.spixy.advancedmusicmanager.db.TagTrackRelation
 import io.spixy.advancedmusicmanager.dialogs.ActionsListDialog
 import io.spixy.advancedmusicmanager.dialogs.ConfirmDialog
@@ -42,6 +42,9 @@ class TagsListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Adapter<T
             ))
             true
         }
+        viewHolder.itemView.checkbox.setOnCheckedChangeListener { _, checked->
+            viewHolder.tag?.status = if(checked) TagWrapper.Status.CHECKED else TagWrapper.Status.NONE
+        }
         return viewHolder
     }
 
@@ -61,9 +64,6 @@ class TagsListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Adapter<T
             itemView.text_tag_name.text = tag.tag.name
             itemView.text_count.text = tag.count.toString()
             itemView.checkbox.isChecked = tag.status == TagWrapper.Status.CHECKED
-            itemView.checkbox.setOnCheckedChangeListener { _, checked ->
-                tag.status = if (checked) TagWrapper.Status.CHECKED else TagWrapper.Status.NONE
-            }
         }
     }
 }
