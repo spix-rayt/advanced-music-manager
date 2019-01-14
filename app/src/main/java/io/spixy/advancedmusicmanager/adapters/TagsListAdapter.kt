@@ -32,10 +32,12 @@ class TagsListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Adapter<T
                     Pair(view.context.resources.getString(R.string.tag_action_delete), {
                         ConfirmDialog(view.context, view.context.resources.getString(R.string.tag_delete_confirm)) {
                             viewHolder.tag?.let { tag ->
-                                TagTrackRelation.deleteByTagId(tag.tag.id)
-                                tag.tag.delete()
-                                tags.remove(tag)
-                                this@TagsListAdapter.notifyDataSetChanged()
+                                if(tag.tag != null){
+                                    TagTrackRelation.deleteByTagId(tag.tag.id)
+                                    tag.tag.delete()
+                                    tags.remove(tag)
+                                    this@TagsListAdapter.notifyDataSetChanged()
+                                }
                             }
                         }
                     })
@@ -61,7 +63,7 @@ class TagsListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Adapter<T
 
         fun bindTag(tag: TagWrapper){
             this.tag = tag
-            itemView.text_tag_name.text = tag.tag.name
+            itemView.text_tag_name.text = tag.tag!!.name
             itemView.text_count.text = tag.count.toString()
             itemView.checkbox.isChecked = tag.status == TagWrapper.Status.CHECKED
         }

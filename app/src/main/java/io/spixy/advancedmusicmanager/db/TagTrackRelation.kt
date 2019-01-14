@@ -9,10 +9,10 @@ import com.activeandroid.query.Select
 
 @Table(name = "TagTrackRelation")
 class TagTrackRelation: Model() {
-    @Column(name = "Tag_id")
+    @Column(name = "Tag_id", index = true)
     lateinit var tag: Tag
 
-    @Column(name="Track_id")
+    @Column(name="Track_id", index = true)
     lateinit var track: Track
 
     companion object {
@@ -46,6 +46,11 @@ class TagTrackRelation: Model() {
                 val tagId = cursor.getLong(0)
                 val count = cursor.getInt(1)
                 result[tagId] = count
+            }
+
+            Cache.openDatabase().rawQuery(Select("COUNT(*)").from(Track::class.java).where(Track.untaggedSql).toSql(), null).let { cursor ->
+                cursor.moveToNext()
+                result[-1] = cursor.getInt(0)
             }
             return result
         }

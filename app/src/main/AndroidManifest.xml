@@ -34,7 +34,7 @@
             android:value="Tracks" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="1" />
+            android:value="2" />
         <meta-data
             android:name="AA_MODELS"
             android:value="io.spixy.advancedmusicmanager.db.Tag, io.spixy.advancedmusicmanager.db.TagTrackRelation, io.spixy.advancedmusicmanager.db.Track" />

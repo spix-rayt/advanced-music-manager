@@ -27,50 +27,52 @@ class Track:Model() {
             Delete().from(Track::class.java).where("Path = ?", path).execute<Track>()
         }
 
-        fun filterByTag(filter: HashMap<Long, TagWrapper.Status>): MutableList<Track> {
-            val tagsByStatus = filter.entries.groupBy({ it.value }, { it.key })
+        const val untaggedSql = "not exists (select * from TagTrackRelation where TagTrackRelation.Track_id = Track.Id)"
+
+        fun filterByTag(filter: HashMap<Long?, TagWrapper.Status>): MutableList<Track> {
+            val tagsByStatus = filter.filterKeys { it != null }.entries.groupBy({ it.value }, { it.key!! })
             val include = tagsByStatus[TagWrapper.Status.INCLUDED] ?: emptyList()
             val exclude = tagsByStatus[TagWrapper.Status.EXCLUDED] ?: emptyList()
-            val none = tagsByStatus[TagWrapper.Status.NONE] ?: emptyList()
+            val require = tagsByStatus[TagWrapper.Status.REQUIRED] ?: emptyList()
 
-            if(include.isNotEmpty() && exclude.isNotEmpty() && none.isEmpty()){
-                val relations = Select()
-                        .from(TagTrackRelation::class.java)
-                        .innerJoin(Tag::class.java)
-                        .on("TagTrackRelation.Tag_id = Tag.Id")
-                        .innerJoin(Track::class.java)
-                        .on("TagTrackRelation.Track_id = Track.Id")
-                        .where("Tag.Id IN (${include.joinToString(separator = ", ")})")
-                        .execute<TagTrackRelation>()
-                val tracks = relations.groupBy({ it.track }, {it.tag.id})
-                return tracks.filter { it.value.containsAll(include) }.keys.toMutableList()
+            val untagged = filter[null]
+
+            val where = mutableListOf<String>()
+
+            if(untagged == TagWrapper.Status.REQUIRED){
+                where.add(untaggedSql)
             }else{
-                val query = Select().from(Track::class.java).leftJoin(TagTrackRelation::class.java).on("TagTrackRelation.Track_id = Track.Id").leftJoin(Tag::class.java).on("TagTrackRelation.Tag_id = Tag.Id")
-
-                val tracks = if(include.isNotEmpty()){
-                    query.where("Tag.Id IN (${include.joinToString(separator = ", ")})")
-                }else{
-                    if(filter.isNotEmpty() && filter.values.all { it == TagWrapper.Status.EXCLUDED }){
-                        query.where("Tag.Id IS NULL")
-                    }else{
-                        query
-                    }
-                }.execute<Track>()
-
-                val excludeTracks = if(exclude.isNotEmpty()){
-                    Select().from(Track::class.java)
-                            .leftJoin(TagTrackRelation::class.java)
-                            .on("TagTrackRelation.Track_id = Track.Id")
-                            .leftJoin(Tag::class.java).on("TagTrackRelation.Tag_id = Tag.Id")
-                            .where("Tag.Id IN (${exclude.joinToString(separator = ", ")})")
-                            .execute<Track>()
-                }else{
-                    emptyList()
+                val includeOrList = mutableListOf<String>()
+                if(include.isNotEmpty() || require.isNotEmpty()){
+                    val includeStringList = (include + require).joinToString(separator = ",")
+                    includeOrList.add("Id in (select Track_id from TagTrackRelation where Tag_id in ($includeStringList))")
                 }
-
-                tracks.removeAll(excludeTracks)
-                return tracks
+                if(untagged == TagWrapper.Status.INCLUDED){
+                    includeOrList.add(untaggedSql)
+                }
+                if(includeOrList.isNotEmpty()){
+                    where.add(includeOrList.joinToString(separator = " or "))
+                }
+                if(require.isNotEmpty()){
+                    require.forEach {
+                        where.add("exists (select * from TagTrackRelation where Track_id = Track.Id and Tag_id = $it)")
+                    }
+                }
+                if(exclude.isNotEmpty()){
+                    val excludeStringList = exclude.joinToString(separator = ",")
+                    where.add("Id not in (select Track_id from TagTrackRelation where Tag_id in ($excludeStringList))")
+                }
             }
+
+            val tracks = if(where.isNotEmpty()){
+                Select()
+                        .from(Track::class.java)
+                        .where(where.joinToString(separator = " and "))
+                        .execute<Track>()
+            }else{
+                emptyList()
+            }
+            return tracks
         }
     }
 }

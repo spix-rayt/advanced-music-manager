@@ -2,8 +2,8 @@ package io.spixy.advancedmusicmanager.activities
 
 import android.app.Activity
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
@@ -32,9 +32,9 @@ class FilterByTagsActivity : AppCompatActivity() {
         loadTags()
 
         if(savedInstanceState != null){
-            val filter = savedInstanceState.getSerializable("FILTER") as HashMap<Long, TagWrapper.Status>
+            val filter = savedInstanceState.getSerializable("FILTER") as HashMap<Long?, TagWrapper.Status>
             tagsListAdapter.tags.forEach {
-                it.status = filter[it.tag.id] ?: TagWrapper.Status.NONE
+                it.status = filter[it.tag?.id] ?: TagWrapper.Status.NONE
             }
         }
 
@@ -46,7 +46,7 @@ class FilterByTagsActivity : AppCompatActivity() {
         }
     }
 
-    private fun getFilterMap() = HashMap(tagsListAdapter.tags.map { it.tag.id to it.status }.toMap())
+    private fun getFilterMap() = HashMap(tagsListAdapter.tags.map { it.tag?.id to it.status }.toMap())
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -60,8 +60,8 @@ class FilterByTagsActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.action_exclude_all -> {
-                tagsListAdapter.tags.filter { it.status == TagWrapper.Status.NONE }.forEach { it.status = TagWrapper.Status.EXCLUDED }
+            R.id.action_include_all -> {
+                tagsListAdapter.tags.filter { it.status == TagWrapper.Status.NONE }.forEach { it.status = TagWrapper.Status.INCLUDED }
                 tagsListAdapter.notifyDataSetChanged()
                 true
             }
@@ -78,7 +78,10 @@ class FilterByTagsActivity : AppCompatActivity() {
         val countTracksGroupByTag = TagTrackRelation.countTracksGroupByTag()
         val elements = Tag.fetchAll()
         tagsListAdapter.tags.clear()
-        tagsListAdapter.tags.addAll(elements.map { TagWrapper(it, countTracksGroupByTag[it.id] ?: 0) }.sortedBy { it.count*-1 })
+        val tags = elements.map { TagWrapper(it, countTracksGroupByTag[it.id] ?: 0) }
+                .sortedBy { it.count * -1 }
+        val untagged = TagWrapper(null, countTracksGroupByTag[-1] ?: 0)
+        tagsListAdapter.tags.addAll(tags + untagged)
         tagsListAdapter.notifyDataSetChanged()
     }
 

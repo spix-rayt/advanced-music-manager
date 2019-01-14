@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     val musicListAdapter = MusicListAdapter(arrayListOf())
     val currentTrackList = BehaviorSubject.create<List<TrackFile>>().toSerialized()
-    var filter = hashMapOf<Long, TagWrapper.Status>()
+    var filter = hashMapOf<Long?, TagWrapper.Status>()
     val sort:BehaviorSubject<Sort> by lazy {
         val defaultSort = Sort.Name
         val savedSort = this.defaultSharedPreferences.getInt(getString(R.string.pref_sort_key), defaultSort.n)
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         BaseApplication.component.inject(this)
 
         if(savedInstanceState != null){
-            filter = savedInstanceState.getSerializable("FILTER") as HashMap<Long, TagWrapper.Status>
+            filter = savedInstanceState.getSerializable("FILTER") as HashMap<Long?, TagWrapper.Status>
             currentPlayListShowed = savedInstanceState.getBoolean("CURRENT_PLAYLIST_SHOWED")
         }
 
@@ -256,7 +256,7 @@ class MainActivity : AppCompatActivity() {
             if(data.action == "OPEN_CURRENT_PLAYLIST"){
                 loadCurrentPlaylist()
             }else{
-                filter = data.getSerializableExtra(FilterByTagsActivity.RESULT_FILTER) as HashMap<Long, TagWrapper.Status>
+                filter = data.getSerializableExtra(FilterByTagsActivity.RESULT_FILTER) as HashMap<Long?, TagWrapper.Status>
                 filterByTag()
             }
         }

@@ -101,7 +101,7 @@ class TrackPageFragment : Fragment() {
     private fun updateInfo(){
         trackFile?.let { track ->
             track_name.text = track.name
-            tags.text = track.getTags().joinToString(separator = ", ") { it.name }
+            tags.text = track.getTags().sortedBy { it.name.toLowerCase() }.joinToString(separator = "\n") { it.name }
         }
     }
 

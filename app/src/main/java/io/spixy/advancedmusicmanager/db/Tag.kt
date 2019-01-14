@@ -7,7 +7,7 @@ import com.activeandroid.query.Select
 
 @Table(name = "Tag")
 class Tag : Model() {
-    @Column(name="Name", index = true)
+    @Column(name="Name")
     lateinit var name:String
 
     companion object {

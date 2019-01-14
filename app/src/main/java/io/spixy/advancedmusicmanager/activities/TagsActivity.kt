@@ -3,7 +3,6 @@ package io.spixy.advancedmusicmanager.activities
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import io.spixy.advancedmusicmanager.R
 import io.spixy.advancedmusicmanager.adapters.TagWrapper
 import io.spixy.advancedmusicmanager.adapters.TagsListAdapter
@@ -26,7 +25,7 @@ class TagsActivity : AppCompatActivity() {
 
         savedInstanceState?.getLongArray("CHECKED")?.let { checkedIds ->
             tagsListAdapter.tags.forEach {
-                if(checkedIds.contains(it.tag.id)){
+                if(checkedIds.contains(it.tag!!.id)){
                     it.status = TagWrapper.Status.CHECKED
                 }else{
                     it.status = TagWrapper.Status.NONE
@@ -48,9 +47,9 @@ class TagsActivity : AppCompatActivity() {
         button_apply.setOnClickListener {
             val track = Track.fetchWithPath(intent.getStringExtra(INTENT_DATA_NAME_PATH))
             TagTrackRelation.deleteByTrackId(track.id)
-            tagsListAdapter.tags.filter { it.status== TagWrapper.Status.CHECKED }.also { Log.d("DBG", it.joinToString { it.tag.name }) }.forEach {
+            tagsListAdapter.tags.filter { it.status== TagWrapper.Status.CHECKED }.forEach {
                 TagTrackRelation().apply {
-                    tag = it.tag
+                    tag = it.tag!!
                     this.track = track
                     save()
                 }
@@ -61,14 +60,14 @@ class TagsActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putLongArray("CHECKED", tagsListAdapter.tags.filter { it.status == TagWrapper.Status.CHECKED }.map { it.tag.id }.toLongArray())
+        outState.putLongArray("CHECKED", tagsListAdapter.tags.filter { it.status == TagWrapper.Status.CHECKED }.map { it.tag!!.id }.toLongArray())
     }
 
     private fun loadTags(){
         val countTracksGroupByTag = TagTrackRelation.countTracksGroupByTag()
         val relations = TagTrackRelation.fetchWithTrackPath(intent.getStringExtra(INTENT_DATA_NAME_PATH))
         val tags = Tag.fetchAll().map { TagWrapper(it, countTracksGroupByTag[it.id]?:0) }.sortedBy { it.count*-1 }
-        tags.forEach { if(relations.map { it.tag.id }.contains(it.tag.id)) it.status = TagWrapper.Status.CHECKED }
+        tags.forEach { if(relations.map { it.tag.id }.contains(it.tag!!.id)) it.status = TagWrapper.Status.CHECKED }
         tagsListAdapter.tags.clear()
         tagsListAdapter.tags.addAll(tags)
         tagsListAdapter.notifyDataSetChanged()

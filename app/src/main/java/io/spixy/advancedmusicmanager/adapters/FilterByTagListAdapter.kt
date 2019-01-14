@@ -14,7 +14,8 @@ class FilterByTagListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Ad
         view.setOnClickListener {
             viewHolder.tag?.apply {
                 status = when(status){
-                    TagWrapper.Status.INCLUDED -> TagWrapper.Status.EXCLUDED
+                    TagWrapper.Status.INCLUDED -> TagWrapper.Status.REQUIRED
+                    TagWrapper.Status.REQUIRED -> TagWrapper.Status.EXCLUDED
                     TagWrapper.Status.EXCLUDED -> TagWrapper.Status.NONE
                     else -> TagWrapper.Status.INCLUDED
                 }
@@ -37,15 +38,16 @@ class FilterByTagListAdapter(val tags: MutableList<TagWrapper>): RecyclerView.Ad
 
         fun bindTag(tag: TagWrapper){
             this.tag = tag
-            itemView.text_tag_name.text = tag.tag.name
+            itemView.text_tag_name.text = tag.tag?.name ?: "untagged"
             itemView.text_count.text = tag.count.toString()
             updateImage(tag)
         }
 
         fun updateImage(tag: TagWrapper){
             when(tag.status){
-                TagWrapper.Status.EXCLUDED -> itemView.image_view.setImageResource(R.drawable.ic_close_black_24dp)
-                TagWrapper.Status.INCLUDED -> itemView.image_view.setImageResource(R.drawable.ic_check_black_24dp)
+                TagWrapper.Status.EXCLUDED -> itemView.image_view.setImageResource(R.drawable.ic_close)
+                TagWrapper.Status.INCLUDED -> itemView.image_view.setImageResource(R.drawable.ic_checked)
+                TagWrapper.Status.REQUIRED -> itemView.image_view.setImageResource(R.drawable.ic_double_checked)
                 else -> itemView.image_view.setImageResource(android.R.color.transparent)
             }
         }
