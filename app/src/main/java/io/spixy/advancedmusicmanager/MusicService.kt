@@ -64,7 +64,7 @@ class MusicService : Service() {
 
         Executors.newScheduledThreadPool(1).scheduleWithFixedDelay({
             synchronized(mediaPlayer){
-                if(trackDuration != 0){
+                if(trackDuration != 0 && mediaPlayer.isPlaying){
                     progressPlaySubject.onNext(mediaPlayer.currentPosition.toDouble() / trackDuration)
                 }
             }
@@ -199,7 +199,7 @@ class MusicService : Service() {
             Track.delete(name)
         }
         if(playSubject.hasValue()){
-            if(playSubject.value.name == name){
+            if(playSubject.value!!.name == name){
                 playNext()
             }
         }

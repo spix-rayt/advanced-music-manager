@@ -2,9 +2,9 @@ package io.spixy.advancedmusicmanager.activities
 
 import android.app.Activity
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.ViewPager
+import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import io.reactivex.Single
@@ -65,12 +65,14 @@ class PlayActivity : AppCompatActivity() {
                     val newCurrentPlayList = musicService.currentPlayList.toMutableList()
                     if(musicService.playSubject.hasValue()){
                         val currentPlay = musicService.playSubject.value
-                        newCurrentPlayList.remove(currentPlay)
-                        newCurrentPlayList.shuffle()
-                        newCurrentPlayList.add(0, currentPlay)
-                        viewPager.adapter = TrackPagerAdapter(supportFragmentManager, newCurrentPlayList)
-                        musicService.currentPlayList = newCurrentPlayList
-                        viewPager.setCurrentItem(0, false)
+                        if(currentPlay != null) {
+                            newCurrentPlayList.remove(currentPlay)
+                            newCurrentPlayList.shuffle()
+                            newCurrentPlayList.add(0, currentPlay)
+                            viewPager.adapter = TrackPagerAdapter(supportFragmentManager, newCurrentPlayList)
+                            musicService.currentPlayList = newCurrentPlayList
+                            viewPager.setCurrentItem(0, false)
+                        }
                     }
                 }
                 true

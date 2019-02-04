@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
                 BiFunction { tracks, sort ->
                     when(sort){
                         Sort.Name -> {
-                            tracks.sortedBy { it.lowerCaseName }
+                            tracks.sortedBy { it.lowerCaseNameForSort }
                         }
                         Sort.Date -> {
                             tracks.sortedByDescending { it.date }
@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         sort.subscribe { sortValue->
-            with(this.defaultSharedPreferences.edit()){
+            defaultSharedPreferences.edit().apply {
                 putInt(getString(R.string.pref_sort_key), sortValue.n)
                 commit()
             }
@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         musicService.subscribe { musicService->
             currentPlayListShowed = false
             val tracks = Track.filterByTag(filter)
-            musicService.musicFiles.sortedWith(compareBy { it.lowerCaseName }).let { musicFiles ->
+            musicService.musicFiles.sortedWith(compareBy { it.lowerCaseNameForSort }).let { musicFiles ->
                 val pathHashSet = tracks.map { it.path }.toHashSet()
                 val trackFiles = musicFiles.filter { pathHashSet.contains(it.name) }
                 currentTrackList.onNext(trackFiles)
@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity() {
             R.id.action_sort -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle(getString(R.string.sort_dialog_title))
-                builder.setSingleChoiceItems(resources.getStringArray(R.array.sort_dialog_items), sort.value.n){ dialog, n ->
+                builder.setSingleChoiceItems(resources.getStringArray(R.array.sort_dialog_items), sort.value!!.n){ dialog, n ->
                     sort.onNext(Sort.values()[n])
                     dialog.dismiss()
                 }
